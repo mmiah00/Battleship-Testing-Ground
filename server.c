@@ -1,5 +1,4 @@
 #include "networking.h"
-#include "battleship.c"
 #include "msg.h"
 
 struct gameBoard server_board;
@@ -11,7 +10,7 @@ int main() {
     int end_game;
     status_message *s_msg;
     introducion_message *i_msg;
-    attack_message *a_msg;
+    struct coordinate *cor;
 
 // The sockets
   int listen_socket;
@@ -67,21 +66,27 @@ int main() {
     while(1)
 {
     // Server attacks -----------------------------------------------------
-    display_my_board(server_board); ///Our map (We have to put our print map)
 
+    display ("ally", server_board.player, server_board, client_board);
+    //display_my_board(server_board); ///Our map (We have to put our print map)
+
+    char input [1000];
     printf("Your turn to attack\n");
-    printf("x: ");
-    scanf("%i", &x);
-    printf("y: ");
-    scanf("%i", &y);
+    printf ("Type in your coordinates: ");
+    fgets (input, sizeof (input), stdin);
+    char ** cords = parse_args (input);
+
+    // printf("x: ");
+    // scanf("%i", &x);
+    // printf("y: ");
+    // scanf("%i", &y);
 
     // Send attack (VIA COORS)
-    a_msg = malloc(sizeof(attack_message));
-    a_msg->type = 2;
-    a_msg->x = x;
-    a_msg->y = y;
-    send(client_socket, a_msg, sizeof(attack_message), 0);
-    free(a_msg);
+    cor = malloc(sizeof(coordinate));
+    cor->x = atoi (cords[0]);
+    cor->y = atoi (cords[1]);
+    send(client_socket, cor, sizeof(coordinate), 0);
+    free(cor);
 
     // Get response (CHECKS if won)
     s_msg = malloc(sizeof(status_message));
@@ -115,20 +120,20 @@ int main() {
 
     // Receive attack
     printf("Waiting for an attack\n");
-    a_msg = malloc(sizeof(attack_message));
-    recv(client_socket, a_msg, sizeof(attack_message), 0);
+    cor = malloc(sizeof(cor));
+    recv(client_socket, cor, sizeof(cor), 0);
 
     // Send response
     s_msg = malloc(sizeof(status_message));
     s_msg->type = 3;
 
-    if (attack_ship(m, a_msg->x, a_msg->y) == 1) // if hit
+    if (attack_ship(m, cor->x, cor->y) == 1) // if hit
     {
         if (check_map(m) == 0) // Check for win conditions here
         {
             s_msg->response = 3; // This means lost
             send(client_socket, s_msg, sizeof(status_message), 0);
-            free(a_msg);
+            free(cor);
             free(s_msg);
             system("clear");
             printf("\nYOU LOST!!!\n\n");
@@ -145,7 +150,7 @@ int main() {
         s_msg->response = 0;
     }
     send(client_socket, s_msg, sizeof(status_message), 0);
-    free(a_msg);
+    free(cor);
     free(s_msg);
     system("clear");
 }

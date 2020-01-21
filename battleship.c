@@ -6,6 +6,10 @@ struct gameBoard{
   int board[8][8]; //ships only be visible to the owner of this board. otherwise it will look like an empty spot
 };
 
+struct coordinate {
+  int x,y;
+};
+
 void introscreen () { //thank you patorjk.com for the ASCII art
   printf ("██╗    ██╗███████╗██╗      ██████╗ ██████╗ ███╗   ███╗███████╗    ████████╗ ██████╗     \n");
   printf ("██║    ██║██╔════╝██║     ██╔════╝██╔═══██╗████╗ ████║██╔════╝    ╚══██╔══╝██╔═══██╗    \n");

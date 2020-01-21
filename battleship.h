@@ -11,6 +11,7 @@
 #include <sys/wait.h>
 
 struct gameBoard;
+struct coordinate; 
 
 void introscreen ();
 
