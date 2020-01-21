@@ -8,7 +8,7 @@ struct gameBoard buffer_board;
 int main() {
   // Messages settings
   int end_game;
-  status_message *s_msg;
+  int status //status_message *s_msg;
   introducion_message *i_msg;
   struct coordinate *cor;
 
@@ -31,15 +31,15 @@ int main() {
 
   printf ("Waiting for other player... \n");
 
-  s_msg = malloc(sizeof(status_message));
+  status = malloc(sizeof(int));
 
-  recv(client_socket, s_msg, sizeof(status_message), 0);
+  recv(client_socket, status, sizeof(int), 0);
 
-  if (s_msg->response != 2)
-  {
-      exit(1);
-  }
-  free(s_msg);
+  // if (status ->response != 2)
+  // {
+  //     exit(1);
+  // }
+  // free(s_msg);
 
   system("clear");
   // ------------------------------------------------------------------------
@@ -83,34 +83,42 @@ int main() {
     free(cor);
 
     // Get response (CHECKS if won)
-    s_msg = malloc(sizeof(status_message));
-    recv(client_socket, s_msg, sizeof(status_message), 0);
+    int status = malloc (sizeof (int));
+    //s_msg = malloc(sizeof(status_message));
+    recv(client_socket, status, sizeof(status), 0);
 
-    switch (s_msg->response)
-    // This is where we find out if the coordinates hit a ship
-    {
-        case 0: // A miss so nothing happens
-            client_map->map[y][x] = MISS; //Change the status
-            break;
-        case 1: // A hit
-            client_map->map[y][x] = HIT; //Change the status
-            break;
-        case 3: //A win
-            system("clear");
-            printf("\nYOU WON!!!\n\n");
-            close(server_socket);
-            close(client_socket);
-            exit(1);
-        default:
-            break;
+    client_board.board[cor->x][cor->y] = status;
+
+    if (finished (&server_board, &client_board)){
+      system (clear);
+      exit (1);
     }
-    free(s_msg);
+    // switch (s_msg->response)
+    // // This is where we find out if the coordinates hit a ship
+    // {
+    //     case 0: // A miss so nothing happens
+    //         client_map->map[y][x] = MISS; //Change the status
+    //         break;
+    //     case 1: // A hit
+    //         client_map->map[y][x] = HIT; //Change the status
+    //         break;
+    //     case 3: //A win
+    //         system("clear");
+    //         printf("\nYOU WON!!!\n\n");
+    //         close(server_socket);
+    //         close(client_socket);
+    //         exit(1);
+    //     default:
+    //         break;
+    // }
+
+    free (status); //free(s_msg);
 
     system("clear");
 
     // Client attacks -----------------------------------------------------
 
-    show_map(m); // show my map
+    display ("ally", server_board.player, server_board, client_board); //show_map(m); // show my map
 
     // Receive attack
     printf("Waiting for an attack\n");
@@ -118,34 +126,35 @@ int main() {
     recv(client_socket, cor, sizeof(cor), 0);
 
     // Send response
-    s_msg = malloc(sizeof(status_message));
-    s_msg->type = 3;
+    status = malloc (sizeof (int)); //s_msg = malloc(sizeof(status_message));
+    //s_msg->type = 3;
 
-    if (attack_ship(m, cor->x, cor->y) == 1) // if hit
-    {
-        if (check_map(m) == 0) // Check for win conditions here
-        {
-            s_msg->response = 3; // This means lost
-            send(client_socket, s_msg, sizeof(status_message), 0);
-            free(cor);
-            free(s_msg);
-            system("clear");
-            printf("\nYOU LOST!!!\n\n");
-            close(server_socket);
-            close(client_socket);
-            exit(1);
-        }
-        else // It was just a hit
-        {
-            s_msg->response = 1;
-        }
-    }
-    else { // This means it was a miss
-        s_msg->response = 0;
-    }
-    send(client_socket, s_msg, sizeof(status_message), 0);
+    status = server_board.board[cor->x][cor->y];
+    // if (attack_ship(m, cor->x, cor->y) == 1) // if hit
+    // {
+    //     if (check_map(m) == 0) // Check for win conditions here
+    //     {
+    //         s_msg->response = 3; // This means lost
+    //         send(client_socket, s_msg, sizeof(status_message), 0);
+    //         free(cor);
+    //         free(s_msg);
+    //         system("clear");
+    //         printf("\nYOU LOST!!!\n\n");
+    //         close(server_socket);
+    //         close(client_socket);
+    //         exit(1);
+    //     }
+    //     else // It was just a hit
+    //     {
+    //         s_msg->response = 1;
+    //     }
+    // }
+    // else { // This means it was a miss
+    //     s_msg->response = 0;
+    // }
+    send(client_socket, status, sizeof(int), 0);
     free(cor);
-    free(s_msg);
+    free(status);
     system("clear");
 }
 }

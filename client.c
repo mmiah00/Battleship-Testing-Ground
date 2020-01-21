@@ -52,38 +52,41 @@ int main(int argc, char **argv) {
 
         // Receive attack
         printf("Waiting for an attack\n");
-        a_msg = malloc(sizeof(attack_message));
-        recv(server_socket, a_msg, sizeof(attack_message), 0);
+        struct coordinate c;
+        c = malloc (sizeof(struct coordinate));   //a_msg = malloc(sizeof(attack_message));
+        recv(server_socket, c, sizeof(struct coordinate), 0);
 
         // Send response
-        s_msg = malloc(sizeof(status_message));
-        s_msg->type = 3;
+        int status;
+        status = malloc (sizeof (int));
+        //s_msg = malloc(sizeof(status_message));
+        //s_msg->type = 3;
+        status = client_board.board[c.x][c.y];
+        // if (client_board.board[c.x][c.y] == 1) // if hit
+        // {
+        //     if (check_map(m) == 0) // Check for win conditions here
+        //     {
+        //         s_msg->response = 3; // This means lost
+        //         send(server_socket, s_msg, sizeof(status_message), 0);
+        //         free(a_msg);
+        //         free(s_msg);
+        //         system("clear");
+        //         PRINT_RED("\nYOU LOST!!!\n\n");
+        //         close(server_socket);
+        //         exit(1);
+        //     }
+        //     else
+        //     {
+        //         s_msg->response = 1; // This means hit
+        //     }
+        // }
+        // else {
+        //     s_msg->response = 0; // This means miss
+        // }
 
-        if (attack_ship(m, a_msg->x, a_msg->y) == 1) // if hit
-        {
-            if (check_map(m) == 0) // Check for win conditions here
-            {
-                s_msg->response = 3; // This means lost
-                send(server_socket, s_msg, sizeof(status_message), 0);
-                free(a_msg);
-                free(s_msg);
-                system("clear");
-                PRINT_RED("\nYOU LOST!!!\n\n");
-                close(server_socket);
-                exit(1);
-            }
-            else
-            {
-                s_msg->response = 1; // This means hit
-            }
-        }
-        else {
-            s_msg->response = 0; // This means miss
-        }
-
-        send(server_socket, s_msg, sizeof(status_message), 0); //send to the server
-        free(a_msg);
-        free(s_msg);
+        send(server_socket, status, sizeof(int), 0); //send to the server
+        free (c); //free(a_msg);
+        free (status); //free(s_msg);
 
         system("clear");
 
