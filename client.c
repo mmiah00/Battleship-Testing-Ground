@@ -10,9 +10,9 @@ int main(int argc, char **argv) {
 
   // Messages settings
   int end_game;
-  status_message *s_msg;
+  int * status //status_message *s_msg;
   introducion_message *i_msg;
-  attack_message *a_msg;
+  struct coordinate *cor;
 
 // The sockets
   int server_socket;
@@ -33,11 +33,15 @@ int main(int argc, char **argv) {
   printf("\nShips ready!\n");
   // ------------------------------------------------------------------------
 
-  s_msg = malloc(sizeof(status_message));
-  s_msg->type = 3;
-  s_msg->response = 2;
-  send(server_socket, s_msg, sizeof(status_message), 0);
-  free(s_msg);
+  status = malloc (sizeof (int*));
+  send(server_socket, status, sizeof(int *), 0);
+  free(status);
+
+  // s_msg = malloc(sizeof(status_message));
+  // s_msg->type = 3;
+  // s_msg->response = 2;
+  // send(server_socket, s_msg, sizeof(status_message), 0);
+  // free(s_msg);
 
 
   // ------------------------------------------------------------------------
@@ -47,21 +51,20 @@ int main(int argc, char **argv) {
     {
         // Server attacks -----------------------------------------------------
 
-        show_map(m); //Our map (We have to put our print map)
+        display("ally", client_board.player, client_board, server_board); //show_map(m); //Our map (We have to put our print map)
 
 
         // Receive attack
         printf("Waiting for an attack\n");
-        struct coordinate c;
-        c = malloc (sizeof(struct coordinate));   //a_msg = malloc(sizeof(attack_message));
-        recv(server_socket, c, sizeof(struct coordinate), 0);
+        cor = malloc (sizeof(struct coordinate));   //a_msg = malloc(sizeof(attack_message));
+        recv(server_socket, cor, sizeof(struct coordinate), 0);
 
         // Send response
-        int status;
-        status = malloc (sizeof (int));
+
+        status = malloc (sizeof (int*));
         //s_msg = malloc(sizeof(status_message));
         //s_msg->type = 3;
-        status = client_board.board[c.x][c.y];
+        status = &client_board.board[c.x][c.y];
         // if (client_board.board[c.x][c.y] == 1) // if hit
         // {
         //     if (check_map(m) == 0) // Check for win conditions here
@@ -85,52 +88,57 @@ int main(int argc, char **argv) {
         // }
 
         send(server_socket, status, sizeof(int), 0); //send to the server
-        free (c); //free(a_msg);
+        free (cor); //free(a_msg);
         free (status); //free(s_msg);
 
         system("clear");
 
         // Your turn to attack ------------------------------------------------
 
-        show_map(m); // print map
+        display ("enemy", client_board.player, client_board, server_board); //show_map(m); // print map
 
 
-        printf("Your turn to attack\n");
-        printf("x: ");
-        scanf("%i", &x);
-        printf("y: ");
-        scanf("%i", &y);
+        char input [1000];                                  // printf("x: ");
+        printf("Your turn to attack\n");                    // scanf("%i", &x);
+        printf ("Type in your coordinates: ");              // printf("y: ");
+        fgets (input, sizeof (input), stdin);               // scanf("%i", &y);
+        char ** cords = parse_args (input);
 
-        // Send attack (VIA COORS)
-        a_msg = malloc(sizeof(attack_message));
-        a_msg->type = 2;
-        a_msg->x = x;
-        a_msg->y = y;
-        send(server_socket, a_msg, sizeof(attack_message), 0);
-        free(a_msg);
+        // Send attack (VIA COORS)                          // Send attack (VIA COORS)
+        cor = malloc(sizeof(coordinate));                   //a_msg = malloc(sizeof(attack_message));
+        cor->x = atoi (cords[0]);                           //a_msg->type = 2;
+        cor->y = atoi (cords[1]);                           //a_msg->x = x;
+        send(client_socket, cor, sizeof(coordinate), 0);    //a_msg->y = y;
+        free(cor);                                          //send(server_socket, a_msg, sizeof(attack_message), 0);
+                                                            //free(a_msg);
 
         // Get response (CHECKS if won)
-        s_msg = malloc(sizeof(status_message));
-        recv(server_socket, s_msg, sizeof(status_message), 0);
+        status = malloc(sizeof(int*)); //s_msg = malloc(sizeof(status_message));
+        recv(server_socket, status, sizeof(int*), 0);
 
-        switch (s_msg->response)
-        // This is where we find out if the coordinates hit a ship
-        {
-            case 0: // A miss so nothing happens
-                server_map->map[y][x] = MISS;
-                break;
-            case 1: // A hit
-                server_map->map[y][x] = HIT;
-                break;
-            case 3: //A win
-                system("clear");
-                printf("\nYOU WON!!!\n\n");
-                close(server_socket);
-                exit(1);
-            default:
-                break;
+        if (finished (&server_board, &client_board)){
+          system (clear);
+          exit (1);
         }
-        free(s_msg);
+        // switch (s_msg->response)
+        // // This is where we find out if the coordinates hit a ship
+        // {
+        //     case 0: // A miss so nothing happens
+        //         server_map->map[y][x] = MISS;
+        //         break;
+        //     case 1: // A hit
+        //         server_map->map[y][x] = HIT;
+        //         break;
+        //     case 3: //A win
+        //         system("clear");
+        //         printf("\nYOU WON!!!\n\n");
+        //         close(server_socket);
+        //         exit(1);
+        //     default:
+        //         break;
+        // }
+
+        free (status); //free(s_msg);
 
         system("clear");
     }

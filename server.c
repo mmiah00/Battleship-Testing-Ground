@@ -8,7 +8,7 @@ struct gameBoard buffer_board;
 int main() {
   // Messages settings
   int end_game;
-  int status //status_message *s_msg;
+  int * status //status_message *s_msg;
   introducion_message *i_msg;
   struct coordinate *cor;
 
@@ -31,7 +31,7 @@ int main() {
 
   printf ("Waiting for other player... \n");
 
-  status = malloc(sizeof(int));
+  status = malloc(sizeof(int*));
 
   recv(client_socket, status, sizeof(int), 0);
 
@@ -83,11 +83,11 @@ int main() {
     free(cor);
 
     // Get response (CHECKS if won)
-    int status = malloc (sizeof (int));
+    status = malloc (sizeof (int));
     //s_msg = malloc(sizeof(status_message));
     recv(client_socket, status, sizeof(status), 0);
 
-    client_board.board[cor->x][cor->y] = status;
+    client_board.board[cor->x][cor->y] = &status;
 
     if (finished (&server_board, &client_board)){
       system (clear);
@@ -129,7 +129,7 @@ int main() {
     status = malloc (sizeof (int)); //s_msg = malloc(sizeof(status_message));
     //s_msg->type = 3;
 
-    status = server_board.board[cor->x][cor->y];
+    status = &server_board.board[cor->x][cor->y];
     // if (attack_ship(m, cor->x, cor->y) == 1) // if hit
     // {
     //     if (check_map(m) == 0) // Check for win conditions here
@@ -152,7 +152,7 @@ int main() {
     // else { // This means it was a miss
     //     s_msg->response = 0;
     // }
-    send(client_socket, status, sizeof(int), 0);
+    send(client_socket, status, sizeof(int*), 0);
     free(cor);
     free(status);
     system("clear");
