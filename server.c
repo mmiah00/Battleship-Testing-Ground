@@ -6,13 +6,13 @@ struct gameBoard client_board;
 struct gameBoard buffer_board;
 
 int main() {
-    // Messages settings
-    int end_game;
-    status_message *s_msg;
-    introducion_message *i_msg;
-    struct coordinate *cor;
+  // Messages settings
+  int end_game;
+  status_message *s_msg;
+  introducion_message *i_msg;
+  struct coordinate *cor;
 
-// The sockets
+  // The sockets
   int listen_socket;
   int client_socket;
   server_board.player = 1;
@@ -31,17 +31,17 @@ int main() {
 
   printf ("Waiting for other player... \n");
 
-    s_msg = malloc(sizeof(status_message));
+  s_msg = malloc(sizeof(status_message));
 
-    recv(client_socket, s_msg, sizeof(status_message), 0);
+  recv(client_socket, s_msg, sizeof(status_message), 0);
 
-    if (s_msg->response != 2)
-    {
-        exit(1);
-    }
-    free(s_msg);
+  if (s_msg->response != 2)
+  {
+      exit(1);
+  }
+  free(s_msg);
 
-    system("clear");
+  system("clear");
   // ------------------------------------------------------------------------
   // Game starts
   while (1) {
@@ -63,23 +63,17 @@ int main() {
 
     // ------------------------------------------------------------------------
     // Game starts
-    while(1)
-{
+    while(1) {
     // Server attacks -----------------------------------------------------
 
     display ("ally", server_board.player, server_board, client_board);
     //display_my_board(server_board); ///Our map (We have to put our print map)
 
-    char input [1000];
-    printf("Your turn to attack\n");
-    printf ("Type in your coordinates: ");
-    fgets (input, sizeof (input), stdin);
+    char input [1000];                          // printf("x: ");
+    printf("Your turn to attack\n");            // scanf("%i", &x);
+    printf ("Type in your coordinates: ");      // printf("y: ");
+    fgets (input, sizeof (input), stdin);       // scanf("%i", &y);
     char ** cords = parse_args (input);
-
-    // printf("x: ");
-    // scanf("%i", &x);
-    // printf("y: ");
-    // scanf("%i", &y);
 
     // Send attack (VIA COORS)
     cor = malloc(sizeof(coordinate));
